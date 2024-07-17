@@ -24,6 +24,7 @@ public class Description extends Fragment {
 
     private FragmentDescriptionBinding binding;
     ImageButton imageButton;
+    EditText editTextName;
     EditText editTextPlace;
     EditText editTextProf;
     EditText editTextDesc;
@@ -35,15 +36,21 @@ public class Description extends Fragment {
         View root = binding.getRoot();
 
         imageButton = root.findViewById(R.id.imgButton1);
+        editTextName = root.findViewById(R.id.fullname);
         editTextPlace = root.findViewById(R.id.place);
         editTextProf = root.findViewById(R.id.profession);
         editTextDesc = root.findViewById(R.id.Description);
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String name = editTextName.getText().toString();
                 String Place = editTextPlace.getText().toString();
                 String Prof = editTextProf.getText().toString();
                 String Desc = editTextDesc.getText().toString();
+                if (name.isEmpty()) {
+                    editTextName.setError("Name must be mentioned");
+                    return;
+                }
                 if (Prof.isEmpty()) {
                     editTextProf.setError("Profession must be mentioned");
                     return;
