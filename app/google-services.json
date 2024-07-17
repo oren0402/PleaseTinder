@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "66136623390",
+    "project_id": "pleasetinder-e87b8",
+    "storage_bucket": "pleasetinder-e87b8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:66136623390:android:5893be4516e89a0ff7210f",
+        "android_client_info": {
+          "package_name": "com.example.pleasetinder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnPbGxXO67e0uVgfkX2_0VuN9VGv5OHbI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
