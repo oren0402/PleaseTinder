@@ -3,6 +3,10 @@ package com.example.pleasetinder.utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class PreferenceManager {
 
     private final SharedPreferences sharedPreferences;
@@ -30,6 +34,17 @@ public class PreferenceManager {
 
     public String getString(String key) {
         return sharedPreferences.getString(key, null);
+    }
+
+    public void putStringSet(List<String> list) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Set<String> set = new HashSet<>(list);
+        editor.putStringSet(Constants.KEY_IMAGE_LIST, set);
+        editor.apply();
+    }
+
+    public Set<String> getStringSet(String key) {
+        return sharedPreferences.getStringSet(key, new HashSet<>());
     }
 
     public void clear() {
