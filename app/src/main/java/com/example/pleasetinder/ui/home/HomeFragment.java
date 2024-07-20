@@ -2,6 +2,7 @@ package com.example.pleasetinder.ui.home;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +13,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -72,10 +76,14 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
     imageAdapter adapter;
     List<Integer> imageResIds;
     FirebaseFirestore database;
+    HashMap<String, String> hashMap = new HashMap<>();
+    Integer imageChanged = 0;
     List<String> listString;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
         HomeViewModel homeViewModel =
                 new ViewModelProvider(this).get(HomeViewModel.class);
 
@@ -88,6 +96,8 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
         for (int i = 0; i < 6; i++) {
             imageResIds.add(R.drawable.ic_add);
         }
+        getUsers();
+
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getActivity());
         layoutManager.setFlexDirection(FlexDirection.ROW);
         layoutManager.setJustifyContent(JustifyContent.FLEX_START);
@@ -96,25 +106,18 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
         binding.recyclerView.setAdapter(adapter);
         int spacing = 10; // 10dp spacing
         binding.recyclerView.addItemDecoration(new SpacesItemDecoration(spacing));
-        Set<String> set = preferenceManager.getStringSet(Constants.KEY_IMAGE_LIST);
-        listString = new ArrayList<>(set);
-        if (listString.size() != 0) {
-            for (int z = 0; z < listString.size(); z++) {
-                removeItem();
-            }
-        } else {
-            getUsers();
-        }
-
         loadUserDetails();
         getToken();
         setListeners();
 
+        // Optional: Scroll to the EditText if needed
+
         return root;
     }
 
-    public void onItemClick() {
+    public void onItemClick(Integer position) {
         // Open the image library
+        imageChanged = position;
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
         startActivityForResult(intent, 1);
@@ -126,22 +129,20 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
             Uri imageUri = data.getData();
             // Handle the selected image URI
             InputStream inputStream = null;
+
             try {
                 inputStream = getActivity().getContentResolver().openInputStream(imageUri);
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                 encodedImage = encodedImage(bitmap);
-                Set<String> set = preferenceManager.getStringSet(Constants.KEY_IMAGE_LIST);
-                List list = new ArrayList<>(set);
-                list.add(encodedImage);
-                preferenceManager.putStringSet(list);
+                hashMap.put(imageChanged.toString(), encodedImage);
                 DocumentReference docRef = database.collection(Constants.KEY_COLLECTION_USERS).document(preferenceManager.getString(Constants.KEY_USER_ID));
-                docRef.update(Collections.singletonMap(Constants.KEY_IMAGE_LIST, list)).
+                docRef.update(Collections.singletonMap(Constants.KEY_IMAGE_LIST, hashMap)).
                         addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
                                     // Success
-                                    removeItem();
+                                    changeItem(imageChanged, encodedImage);
                                 }
                             }
                         });
@@ -159,27 +160,50 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
                     if (task.isSuccessful() && task.getResult() != null) {
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
                             if (currentUserId.equals(queryDocumentSnapshot.getId())) {
-                                List<String> myList = (List<String>) queryDocumentSnapshot.get(Constants.KEY_IMAGE_LIST);
+                                hashMap = (HashMap<String, String>) queryDocumentSnapshot.get(Constants.KEY_IMAGE_LIST);
                                 try {
-                                    if (myList.size() > 0) {
-                                        for (int z = 0; z < myList.size(); z++) {
-                                            removeItem();
+                                    if (hashMap == null) {
+                                        hashMap = new HashMap<>();
+                                    } else if (hashMap.size() > 0) {
+                                        Integer z = 0;
+                                        for (String key : hashMap.keySet()) {
+                                            changeItem(Integer.parseInt(key), hashMap.get(key));
+                                            z++;
                                         }
-                                        preferenceManager.putStringSet(myList);
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-
+                                if (queryDocumentSnapshot.get(Constants.KEY_AGE) != null) {
+                                    Integer age = (Integer) Integer.parseInt((String) queryDocumentSnapshot.get(Constants.KEY_AGE));
+                                    if (age != null) {
+                                        binding.inputAge.setText(age.toString());
+                                    }
+                                }
+                                if (queryDocumentSnapshot.get(Constants.KEY_DESCRIPTION) != null) {
+                                    String description = (String) queryDocumentSnapshot.get(Constants.KEY_DESCRIPTION);
+                                    if (description != null) {
+                                        binding.inputDescription.setText(description);
+                                    }
+                                }
+                                if (queryDocumentSnapshot.get(Constants.KEY_AGE) != null && queryDocumentSnapshot.get(Constants.KEY_DESCRIPTION) != null) {
+                                    binding.imageSave.setBackgroundResource(R.drawable.background_icon);
+                                }
                             }
                         }
                     }
                 });
     }
 
-    public void removeItem() {
-        imageResIds.remove(imageResIds.size() - 1); // Remove the last item
-        adapter.notifyItemRemoved(imageResIds.size());
+    public void changeItem(Integer g, String image) {
+        // Remove the last item
+        RecyclerView.ViewHolder viewHolder = binding.recyclerView.findViewHolderForAdapterPosition(g);
+        if (viewHolder != null) {
+            imageAdapter.MyViewHolder itemViewHolder = (imageAdapter.MyViewHolder) viewHolder;
+            byte[] bytes = Base64.decode(image, Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            itemViewHolder.imageView.setImageBitmap(bitmap);
+        }
     }
 
     private String encodedImage(Bitmap bitmap) {
@@ -197,6 +221,30 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
             @Override
             public void onClick(View view) {
                 signOut();
+            }
+        });
+        binding.imageSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String age = binding.inputAge.getText().toString();
+                String desc = binding.inputDescription.getText().toString();
+                if(isInteger(age)) {
+                    HashMap<String, Object> user = new HashMap<>();
+                    user.put(Constants.KEY_AGE, age);
+                    user.put(Constants.KEY_DESCRIPTION, desc);
+                    DocumentReference docRef = database.collection(Constants.KEY_COLLECTION_USERS).document(preferenceManager.getString(Constants.KEY_USER_ID));
+                    docRef.update(user).
+                            addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        binding.imageSave.setBackgroundResource(R.drawable.background_icon);
+                                    }
+                                }
+                            });
+                } else {
+                    binding.inputAge.setError("Must be a number");
+                }
             }
         });
     }
@@ -261,5 +309,14 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    public static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }
