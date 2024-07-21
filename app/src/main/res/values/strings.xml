@@ -27,4 +27,8 @@
     <string name="select_user">Select User</string>
     <string name="type_a_message">Type a message</string>
     <string name="online">Online</string>
+    <string-array name="initial_slider_values">
+        <item>18</item>
+        <item>35</item>
+    </string-array>
 </resources>

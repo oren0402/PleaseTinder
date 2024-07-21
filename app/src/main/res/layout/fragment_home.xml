@@ -11,11 +11,17 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint"
         android:layout_width="match_parent"
+        android:visibility="invisible"
         android:layout_height="match_parent">
 
-    <com.makeramen.roundedimageview.RoundedImageView
+
+
+
+        <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/imageProfile"
         android:layout_width="@dimen/_30sdp"
         android:layout_height="@dimen/_30sdp"
@@ -59,17 +65,17 @@
         app:layout_constraintStart_toEndOf="@id/imageProfile"
         app:layout_constraintTop_toTopOf="@+id/imageProfile"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="@dimen/_250sdp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_70sdp"
-        android:layout_marginLeft="@dimen/_30sdp"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textName" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="@dimen/_250sdp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="44dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textName" />
 
-    <TextView
+        <TextView
         android:id="@+id/age"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -136,7 +142,48 @@
         app:layout_constraintLeft_toLeftOf="@id/Description"
         app:layout_constraintTop_toBottomOf="@id/inputAge" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+        <TextView
+            android:id="@+id/ageFor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="48dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Looking For:"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_14ssp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/Description" />
+
+        <com.google.android.material.slider.RangeSlider
+            android:id="@+id/RangeSlider"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="140dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/background_icon"
+            android:stepSize="1"
+            android:valueFrom="18"
+            android:valueTo="99"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/inputDescription"
+            app:values="@array/initial_slider_values" />
+
+        <TextView
+            android:id="@+id/ageForText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:text="18-99"
+            android:textColor="@color/gray"
+            android:textSize="@dimen/_14ssp"
+            app:layout_constraintStart_toEndOf="@id/RangeSlider"
+            app:layout_constraintTop_toBottomOf="@id/inputDescription" />
+
+        <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/imageSave"
         android:layout_width="@dimen/_80sdp"
         android:layout_height="@dimen/_40sdp"
@@ -151,4 +198,15 @@
         app:layout_constraintTop_toBottomOf="@id/inputDescription" />
     </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        android:layout_width="@dimen/_100sdp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="@dimen/_100sdp"
+        android:visibility="visible"
+        tools:layout_editor_absoluteX="189dp"
+        tools:layout_editor_absoluteY="324dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,6 +6,9 @@ public class Constants {
     public static final String KEY_EMAIL = "email";
     public static final String KEY_AGE = "age";
     public static final String KEY_DESCRIPTION = "description";
+    public static final String KEY_AGE_FOR = "ageFor";
+    public static final String KEY_AGE_FOR_MIN = "ageForMin";
+    public static final String KEY_AGE_FOR_MAX = "ageForMax";
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_PREFERENCE_NAME = "chatAppPreference";
     public static final String KEY_IS_SIGNED_IN = "isSignedIn";

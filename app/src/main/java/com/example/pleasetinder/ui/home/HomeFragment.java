@@ -46,6 +46,8 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.slider.LabelFormatter;
+import com.google.android.material.slider.RangeSlider;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
@@ -66,6 +68,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class HomeFragment extends BaseFragment implements ConversionListener {
@@ -186,9 +189,21 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
                                         binding.inputDescription.setText(description);
                                     }
                                 }
-                                if (queryDocumentSnapshot.get(Constants.KEY_AGE) != null && queryDocumentSnapshot.get(Constants.KEY_DESCRIPTION) != null) {
+                                if (queryDocumentSnapshot.get(Constants.KEY_AGE_FOR) != null) {
+                                    List<Double> values = (List<Double>) queryDocumentSnapshot.get(Constants.KEY_AGE_FOR);
+                                    if (values != null) {
+                                        binding.RangeSlider.setValues(values.get(0).floatValue(), values.get(1).floatValue());
+                                        binding.ageForText.setText(values.get(0).intValue() + "-" + values.get(1).intValue());
+                                        preferenceManager.putInteger(Constants.KEY_AGE_FOR_MIN, values.get(0).intValue());
+                                        preferenceManager.putInteger(Constants.KEY_AGE_FOR_MAX, values.get(1).intValue());
+                                    }
+                                }
+                                if (queryDocumentSnapshot.get(Constants.KEY_AGE) != null && queryDocumentSnapshot.get(Constants.KEY_DESCRIPTION) != null && queryDocumentSnapshot.get(Constants.KEY_AGE_FOR) != null) {
                                     binding.imageSave.setBackgroundResource(R.drawable.background_icon);
                                 }
+                                getActivity().findViewById(R.id.nav_view).setVisibility(View.VISIBLE);
+                                binding.progressBar1.setVisibility(View.INVISIBLE);
+                                binding.constraint.setVisibility(View.VISIBLE);
                             }
                         }
                     }
@@ -228,16 +243,20 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
             public void onClick(View view) {
                 String age = binding.inputAge.getText().toString();
                 String desc = binding.inputDescription.getText().toString();
+                List<Float> values = binding.RangeSlider.getValues();
                 if(isInteger(age)) {
                     HashMap<String, Object> user = new HashMap<>();
                     user.put(Constants.KEY_AGE, age);
                     user.put(Constants.KEY_DESCRIPTION, desc);
+                    user.put(Constants.KEY_AGE_FOR, values);
                     DocumentReference docRef = database.collection(Constants.KEY_COLLECTION_USERS).document(preferenceManager.getString(Constants.KEY_USER_ID));
                     docRef.update(user).
                             addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
+                                        preferenceManager.putInteger(Constants.KEY_AGE_FOR_MIN, values.get(0).intValue());
+                                        preferenceManager.putInteger(Constants.KEY_AGE_FOR_MAX, values.get(1).intValue());
                                         binding.imageSave.setBackgroundResource(R.drawable.background_icon);
                                     }
                                 }
@@ -247,6 +266,14 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
                 }
             }
         });
+        binding.RangeSlider.addOnChangeListener(new RangeSlider.OnChangeListener() {
+            @Override
+            public void onValueChange(@NonNull RangeSlider slider, float value, boolean fromUser) {
+                List<Float> values = binding.RangeSlider.getValues();
+                binding.ageForText.setText(values.get(0).intValue() + "-" + values.get(1).intValue());
+            }
+        });
+
     }
 
 
