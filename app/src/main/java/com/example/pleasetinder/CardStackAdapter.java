@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.ViewHolder> {
 
     private List<ItemModel> items;
+    private ViewGroup parentH;
 
     public CardStackAdapter(List<ItemModel> items) {
         this.items = items;
@@ -24,6 +26,7 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        parentH = parent;
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.item_card, parent, false);
         return new ViewHolder(view);
@@ -51,10 +54,9 @@ public class CardStackAdapter extends RecyclerView.Adapter<CardStackAdapter.View
         }
 
         void setData(ItemModel data) {
-            Picasso.get()
+            Glide.with(parentH.getContext())
+                    .asBitmap()
                     .load(data.getImage())
-                    .fit()
-                    .centerCrop()
                     .into(image);
             nama.setText(data.getNama());
             usia.setText(data.getUsia());

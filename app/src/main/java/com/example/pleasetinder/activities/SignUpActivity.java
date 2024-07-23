@@ -31,11 +31,13 @@ import java.util.HashMap;
 public class SignUpActivity extends AppCompatActivity {
 
     private String encodedImage;
+    private String encodedImageBig;
     private PreferenceManager preferenceManager;
     EditText inputName;
     EditText inputEmail;
     EditText inputPassword;
     EditText inputConfirmPassword;
+    Uri imageUri;
     RoundedImageView roundedImageView;
     TextView textView;
 
@@ -91,6 +93,7 @@ public class SignUpActivity extends AppCompatActivity {
         user.put(Constants.KEY_EMAIL, inputEmail.getText().toString());
         user.put(Constants.KEY_PASSWORD, inputPassword.getText().toString());
         user.put(Constants.KEY_IMAGE, encodedImage);
+        user.put(Constants.KEY_IMAGE_BIG, encodedImageBig);
         dataBase.collection(Constants.KEY_COLLECTION_USERS)
                 .add(user)
                 .addOnSuccessListener(documentReference -> {
@@ -119,18 +122,29 @@ public class SignUpActivity extends AppCompatActivity {
         return Base64.encodeToString(bytes, Base64.DEFAULT);
     }
 
+    private String encodedImageBig(Bitmap bitmap) {
+        int previewWidth = 500;
+        int previewHeight = 800;
+        Bitmap previewBitmap = Bitmap.createScaledBitmap(bitmap, previewWidth, previewHeight, false);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        previewBitmap.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(bytes, Base64.DEFAULT);
+    }
+
     private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if(result.getResultCode() == RESULT_OK) {
                     if(result.getData() != null) {
-                        Uri imageUri = result.getData().getData();
+                        imageUri = result.getData().getData();
                         try {
                             InputStream inputStream = getContentResolver().openInputStream(imageUri);
                             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                             roundedImageView.setImageBitmap(bitmap);
                             textView.setVisibility(View.GONE);
                             encodedImage = encodedImage(bitmap);
+                            encodedImageBig = encodedImageBig(bitmap);
                         }catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }

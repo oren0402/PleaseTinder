@@ -1,21 +1,26 @@
 package com.example.pleasetinder;
 
+import android.graphics.Bitmap;
+import android.net.Uri;
+
+import java.net.URI;
+
 public class ItemModel {
-    private int image;
+    private Bitmap image;
     private String nama,usia, kota;
 
     public ItemModel() {
 
     }
 
-    public ItemModel(int image, String nama, String usia, String kota) {
+    public ItemModel(Bitmap image, String nama, String usia, String kota) {
         this.image = image;
         this.nama = nama;
         this.usia = usia;
         this.kota = kota;
     }
 
-    public int getImage() {
+    public Bitmap getImage() {
         return image;
     }
 
