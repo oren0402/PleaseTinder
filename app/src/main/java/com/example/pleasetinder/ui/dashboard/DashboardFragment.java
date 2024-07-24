@@ -2,29 +2,21 @@ package com.example.pleasetinder.ui.dashboard;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.DiffUtil;
 
 import com.example.pleasetinder.CardStackAdapter;
-import com.example.pleasetinder.CardStackCallback;
 import com.example.pleasetinder.ItemModel;
 import com.example.pleasetinder.R;
 import com.example.pleasetinder.databinding.FragmentDashboardBinding;
@@ -32,6 +24,7 @@ import com.example.pleasetinder.utilities.Constants;
 import com.example.pleasetinder.utilities.PreferenceManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -42,11 +35,8 @@ import com.yuyakaido.android.cardstackview.Direction;
 import com.yuyakaido.android.cardstackview.StackFrom;
 import com.yuyakaido.android.cardstackview.SwipeableMethod;
 
-import org.checkerframework.checker.units.qual.A;
-import org.checkerframework.checker.units.qual.N;
-
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class DashboardFragment extends Fragment {
@@ -62,8 +52,11 @@ public class DashboardFragment extends Fragment {
     List<String> Names = new ArrayList<>();
     List<String> Descriptions = new ArrayList<>();
     List<String> Ages = new ArrayList<>();
+    List<String> UsersID = new ArrayList<>();
     Integer atUserNumber = 0;
+    Integer cardsSeen = 0;
     List<ItemModel> list;
+    Integer count = 0;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -89,22 +82,59 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onCardSwiped(Direction direction) {
                 Log.d(TAG, "onCardSwiped: p=" + manager.getTopPosition() + " d=" + direction);
-                if (Images.size() > atUserNumber) {
-                    list.remove(0);
-                    list.add(new ItemModel(Images.get(atUserNumber), Names.get(atUserNumber), Ages.get(atUserNumber), Descriptions.get(atUserNumber)));
-                    adapter.notifyDataSetChanged();
-                }
                 if (direction == Direction.Right){
-                    Toast.makeText(getActivity(), "Direction Right", Toast.LENGTH_SHORT).show();
-                }
-                if (direction == Direction.Top){
-                    Toast.makeText(getActivity(), "Direction Top", Toast.LENGTH_SHORT).show();
+                    HashMap<String, Object> user = new HashMap<>();
+                    user.put(Constants.KEY_NAME, Names.get(cardsSeen));
+                    user.put(Constants.KEY_USER_SEEN, preferenceManager.getString(Constants.KEY_NAME));
+                    db.collection(Constants.KEY_COLLECTION_USERS_SEEN).document(UsersID.get(cardsSeen)).set(user);
+                    db.collection(Constants.KEY_COLLECTION_USERS_REQUESTED).
+                            whereEqualTo(Constants.KEY_NAME, preferenceManager.getString(Constants.KEY_NAME))
+                            .whereEqualTo(Constants.KEY_USER_SEEN , Names.get(cardsSeen))
+                            .get()
+                            .addOnCompleteListener(task -> {
+                                if(task.isSuccessful() && task.getResult() != null
+                                        && task.getResult().getDocuments().size() > 0) {
+                                    db.collection(Constants.KEY_COLLECTION_USERS_REQUESTED).document(task.getResult().getDocuments().get(0).getId()).delete();
+                                    HashMap<String, Object> usersID = new HashMap<>();
+                                    usersID.put(Constants.KEY_USER_REQUESTED, UsersID.get(cardsSeen));
+                                    usersID.put(Constants.KEY_USER_ACCEPTED, preferenceManager.getString(Constants.KEY_USER_ID));
+                                    db.collection(Constants.KEY_COLLECTION_USERS_ACCEPTED).document(UsersID.get(cardsSeen)).set(usersID);
+                                } else if (task.isSuccessful() && task.getResult().getDocuments().size() == 0) {
+                                    db.collection(Constants.KEY_COLLECTION_USERS_REQUESTED).document(UsersID.get(cardsSeen)).set(user);
+                                }
+                                cardsSeen++;
+                                if (Images.size() > atUserNumber) {
+                                    list.remove(0);
+                                    list.add(new ItemModel(Images.get(atUserNumber), Names.get(atUserNumber), Ages.get(atUserNumber), Descriptions.get(atUserNumber)));
+                                    atUserNumber++;
+                                    adapter.notifyDataSetChanged();
+                                }
+                            });
+
                 }
                 if (direction == Direction.Left){
-                    Toast.makeText(getActivity(), "Direction Left", Toast.LENGTH_SHORT).show();
-                }
-                if (direction == Direction.Bottom){
-                    Toast.makeText(getActivity(), "Direction Bottom", Toast.LENGTH_SHORT).show();
+                    HashMap<String, Object> user = new HashMap<>();
+                    user.put(Constants.KEY_NAME, Names.get(cardsSeen));
+                    user.put(Constants.KEY_USER_SEEN, preferenceManager.getString(Constants.KEY_NAME));
+                    db.collection(Constants.KEY_COLLECTION_USERS_SEEN).document(UsersID.get(cardsSeen)).set(user);
+                    db.collection(Constants.KEY_COLLECTION_USERS_REQUESTED).
+                            whereEqualTo(Constants.KEY_NAME, preferenceManager.getString(Constants.KEY_NAME))
+                            .whereEqualTo(Constants.KEY_USER_SEEN , Names.get(cardsSeen))
+                            .get()
+                            .addOnCompleteListener(task -> {
+                                if(task.isSuccessful() && task.getResult() != null
+                                        && task.getResult().getDocuments().size() > 0) {
+                                    db.collection(Constants.KEY_COLLECTION_USERS_REQUESTED).document(task.getResult().getDocuments().get(0).getId()).delete();
+                                }
+                                cardsSeen++;
+                                if (Images.size() > atUserNumber) {
+                                    list.remove(0);
+                                    list.add(new ItemModel(Images.get(atUserNumber), Names.get(atUserNumber), Ages.get(atUserNumber), Descriptions.get(atUserNumber)));
+                                    atUserNumber++;
+                                    adapter.notifyDataSetChanged();
+                                }
+                            });
+
                 }
 
                 // Paginating
@@ -138,7 +168,7 @@ public class DashboardFragment extends Fragment {
         manager.setScaleInterval(0.95f);
         manager.setSwipeThreshold(0.3f);
         manager.setMaxDegree(20.0f);
-        manager.setDirections(Direction.FREEDOM);
+        manager.setDirections(Direction.HORIZONTAL);
         manager.setCanScrollHorizontal(true);
         manager.setSwipeableMethod(SwipeableMethod.Manual);
         manager.setOverlayInterpolator(new LinearInterpolator());
@@ -156,41 +186,69 @@ public class DashboardFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
+                            Integer size = task.getResult().size();
+                            Log.d("imgay", size.toString());
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 // Access the document data
+                                List<Double> values = (List<Double>) document.get(Constants.KEY_AGE_FOR);
                                 String age = (String) document.get(Constants.KEY_AGE);
-                                if (isBetween(Integer.parseInt(age), ageMin, ageMax)) {
-                                    Ages.add(age);
-                                        // Open an InputStream from the Uri
-                                    String string = (String) document.get(Constants.KEY_IMAGE_BIG);
-                                    byte[] bytes = Base64.decode(string, Base64.DEFAULT);
-                                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                    Images.add(bitmap);
-                                    // Close the InputStream
-                                    String description = (String) document.get(Constants.KEY_DESCRIPTION);
-                                    Descriptions.add(description);
-                                    String name = (String) document.get(Constants.KEY_NAME);
-                                    Names.add(name);
-                                    Log.d("chopping", Names.toString());
-                                }
+                                String string = (String) document.get(Constants.KEY_IMAGE_BIG);
+                                String description = (String) document.get(Constants.KEY_DESCRIPTION);
+                                String name = (String) document.get(Constants.KEY_NAME);
+                                String otherUserID = document.getId();
+                                db.collection(Constants.KEY_COLLECTION_USERS_SEEN)
+                                        .whereEqualTo(Constants.KEY_NAME, name)
+                                        .whereEqualTo(Constants.KEY_USER_SEEN, preferenceManager.getString(Constants.KEY_NAME))
+                                        .get()
+                                        .addOnCompleteListener(task1 -> {
+                                            count++;
+                                            Log.d("imgay", count.toString());
+                                            if (task1.isSuccessful() && task1.getResult() != null
+                                                    && task1.getResult().getDocuments().size() > 0) {
+
+                                            } else {
+                                                Log.d("imgay", "here");
+                                                if (age != null && string != null && description != null && name != null) {
+                                                    if (isBetween(Integer.parseInt(age), ageMin, ageMax)) {
+                                                        if (values != null) {
+                                                            if (isBetween(preferenceManager.getInteger(Constants.KEY_AGE), values.get(0).intValue(), values.get(1).intValue())) {
+                                                                if (document.getId().equals(preferenceManager.getString(Constants.KEY_USER_ID))) {
+
+                                                                } else {
+                                                                    Ages.add(age);
+                                                                    byte[] bytes = Base64.decode(string, Base64.DEFAULT);
+                                                                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                                                    Images.add(bitmap);
+                                                                    Descriptions.add(description);
+                                                                    Names.add(name);
+                                                                    UsersID.add(otherUserID);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            if (count == size) {
+                                                Log.d("imgay", "hi");
+                                                if (Images.size() >= 10) {
+                                                    for (int i = 0; i < 10; i++) {
+                                                        items.add(new ItemModel(Images.get(i), Names.get(i), Ages.get(i), Descriptions.get(i)));
+                                                        atUserNumber++;
+                                                    }
+                                                } else {
+                                                    for (int i = 0; i < Images.size(); i++) {
+                                                        items.add(new ItemModel(Images.get(i), Names.get(i), Ages.get(i), Descriptions.get(i)));
+                                                        atUserNumber++;
+                                                    }
+                                                }
+                                                list = items;
+                                                adapter = new CardStackAdapter(list);
+                                                cardStackView.setLayoutManager(manager);
+                                                cardStackView.setAdapter(adapter);
+                                                cardStackView.setItemAnimator(new DefaultItemAnimator());
+                                            }
+                                        });
                             }
-                            Log.d("chopping", Images.toString());
-                            if (Images.size() >= 10) {
-                                for (int i = 0; i < 10; i++) {
-                                    items.add(new ItemModel(Images.get(i), Names.get(i), Ages.get(i), Descriptions.get(i)));
-                                    atUserNumber++;
-                                }
-                            } else {
-                                for (int i = 0; i < Images.size(); i++) {
-                                    items.add(new ItemModel(Images.get(i), Names.get(i), Ages.get(i), Descriptions.get(i)));
-                                    atUserNumber++;
-                                }
-                            }
-                            list = items;
-                            adapter = new CardStackAdapter(list);
-                            cardStackView.setLayoutManager(manager);
-                            cardStackView.setAdapter(adapter);
-                            cardStackView.setItemAnimator(new DefaultItemAnimator());
                         }
                     }
                 });

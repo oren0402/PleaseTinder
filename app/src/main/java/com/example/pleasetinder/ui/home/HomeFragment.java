@@ -181,6 +181,7 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
                                     Integer age = (Integer) Integer.parseInt((String) queryDocumentSnapshot.get(Constants.KEY_AGE));
                                     if (age != null) {
                                         binding.inputAge.setText(age.toString());
+                                        preferenceManager.putInteger(Constants.KEY_AGE, age);
                                     }
                                 }
                                 if (queryDocumentSnapshot.get(Constants.KEY_DESCRIPTION) != null) {

@@ -30,4 +30,10 @@ public class Constants {
     public static final String KEY_RECEIVER_IMAGE = "receiverImage";
     public static final String KEY_LAST_MESSAGE = "lastMessage";
     public static final String KEY_AVAILABILITY = "availability";
+    public static final String KEY_COLLECTION_USERS_SEEN = "usersSeen";
+    public static final String KEY_COLLECTION_USERS_REQUESTED = "userRequested";
+    public static final String KEY_COLLECTION_USERS_ACCEPTED = "userAccepted";
+    public static final String KEY_USER_REQUESTED = "userRequested";
+    public static final String KEY_USER_ACCEPTED = "userAccepted";
+    public static final String KEY_USER_SEEN = "userSeen";
 }
