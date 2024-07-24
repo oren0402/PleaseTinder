@@ -2,6 +2,7 @@ package com.example.pleasetinder.ui.notifications;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,8 @@ import com.example.pleasetinder.utilities.PreferenceManager;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import org.checkerframework.checker.units.qual.C;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +31,7 @@ public class NotificationsFragment extends BaseFragment implements UserListener 
 
     private FragmentNotificationsBinding binding;
     private PreferenceManager preferenceManager;
+    Integer count = 0;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -46,31 +50,70 @@ public class NotificationsFragment extends BaseFragment implements UserListener 
     private void getUsers() {
         loading(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
-        database.collection(Constants.KEY_COLLECTION_USERS)
+        database.collection(Constants.KEY_COLLECTION_USERS_ACCEPTED)
                 .get()
                 .addOnCompleteListener(task -> {
                     loading(false);
                     String currentUserId = preferenceManager.getString(Constants.KEY_USER_ID);
                     if (task.isSuccessful() && task.getResult() != null) {
                         List<User> users = new ArrayList<>();
-                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            if (currentUserId.equals(queryDocumentSnapshot.getId())) {
-                                continue;
-                            }
-                            User user = new User();
-                            user.name = queryDocumentSnapshot.getString(Constants.KEY_NAME);
-                            user.email = queryDocumentSnapshot.getString(Constants.KEY_EMAIL);
-                            user.image = queryDocumentSnapshot.getString(Constants.KEY_IMAGE);
-                            user.token = queryDocumentSnapshot.getString(Constants.KEY_FCM_TOKEN);
-                            user.id = queryDocumentSnapshot.getId();
-                            users.add(user);
-                        }
-                        if (users.size() > 0) {
-                            UsersAdapter usersAdapter = new UsersAdapter(users, this);
-                            binding.usersRecyclerView.setAdapter(usersAdapter);
-                            binding.usersRecyclerView.setVisibility(View.VISIBLE);
-                        } else {
+                        Integer size = task.getResult().size();
+                        if (size == 0) {
                             showErrorMessage();
+                        }
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            count++;
+                            if (queryDocumentSnapshot.getString(Constants.KEY_USER_REQUESTED).equals(preferenceManager.getString(Constants.KEY_USER_ID))) {
+                                String otherUserID = queryDocumentSnapshot.getString(Constants.KEY_USER_ACCEPTED);
+                                database.collection(Constants.KEY_COLLECTION_USERS).document(otherUserID).get().addOnCompleteListener(task1 -> {
+                                    User user = new User();
+                                    user.name = task1.getResult().getString(Constants.KEY_NAME);
+                                    user.email = task1.getResult().getString(Constants.KEY_EMAIL);
+                                    user.image = task1.getResult().getString(Constants.KEY_IMAGE);
+                                    user.token = task1.getResult().getString(Constants.KEY_FCM_TOKEN);
+                                    user.id = task1.getResult().getId();
+                                    users.add(user);
+                                    if (count == size) {
+                                        if (users.size() > 0) {
+                                            UsersAdapter usersAdapter = new UsersAdapter(users, this);
+                                            binding.usersRecyclerView.setAdapter(usersAdapter);
+                                            binding.usersRecyclerView.setVisibility(View.VISIBLE);
+                                        } else {
+                                            showErrorMessage();
+                                        }
+                                    }
+                                });
+                            } else if (queryDocumentSnapshot.getString(Constants.KEY_USER_ACCEPTED).equals(preferenceManager.getString(Constants.KEY_USER_ID))) {
+                                String otherUserID = queryDocumentSnapshot.getString(Constants.KEY_USER_REQUESTED);
+                                database.collection(Constants.KEY_COLLECTION_USERS).document(otherUserID).get().addOnCompleteListener(task1 -> {
+                                    User user = new User();
+                                    user.name = task1.getResult().getString(Constants.KEY_NAME);
+                                    user.email = task1.getResult().getString(Constants.KEY_EMAIL);
+                                    user.image = task1.getResult().getString(Constants.KEY_IMAGE);
+                                    user.token = task1.getResult().getString(Constants.KEY_FCM_TOKEN);
+                                    user.id = task1.getResult().getId();
+                                    users.add(user);
+                                    if (count == size) {
+                                        if (users.size() > 0) {
+                                            UsersAdapter usersAdapter = new UsersAdapter(users, this);
+                                            binding.usersRecyclerView.setAdapter(usersAdapter);
+                                            binding.usersRecyclerView.setVisibility(View.VISIBLE);
+                                        } else {
+                                            showErrorMessage();
+                                        }
+                                    }
+                                });
+                            } else {
+                                if (count == size) {
+                                    if (users.size() > 0) {
+                                        UsersAdapter usersAdapter = new UsersAdapter(users, this);
+                                        binding.usersRecyclerView.setAdapter(usersAdapter);
+                                        binding.usersRecyclerView.setVisibility(View.VISIBLE);
+                                    } else {
+                                        showErrorMessage();
+                                    }
+                                }
+                            }
                         }
                     } else {
                         showErrorMessage();
