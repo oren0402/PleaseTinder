@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -46,6 +47,7 @@ public class DashboardFragment extends Fragment {
     private static final String TAG = "MainActivity";
     private CardStackLayoutManager manager;
     CardStackView cardStackView;
+    ImageView imageView;
     private CardStackAdapter adapter;
     private PreferenceManager preferenceManager;
     List<Bitmap> Images = new ArrayList<>();
@@ -67,6 +69,7 @@ public class DashboardFragment extends Fragment {
         cardStackView = root.findViewById(R.id.card_stack_view);
         preferenceManager = new PreferenceManager(getActivity());
         db = FirebaseFirestore.getInstance();
+        imageView = binding.imageView;
         setUpCards();
 
         return root;
@@ -76,17 +79,33 @@ public class DashboardFragment extends Fragment {
         manager = new CardStackLayoutManager(getActivity(), new CardStackListener() {
             @Override
             public void onCardDragging(Direction direction, float ratio) {
-                Log.d(TAG, "onCardDragging: d=" + direction.name() + " ratio=" + ratio);
+                if (ratio == 0) {
+                    imageView.setVisibility(View.GONE);
+                    imageView.setAlpha(ratio);
+                }
+                if (direction == Direction.Right) {
+                    imageView.setImageResource(R.drawable.check);
+                    imageView.setVisibility(View.VISIBLE);
+                    imageView.setAlpha(ratio);
+
+                }
+                if (direction == Direction.Left) {
+                    imageView.setImageResource(R.drawable.close);
+                    imageView.setVisibility(View.VISIBLE);
+                    imageView.setAlpha(ratio);
+                }
             }
 
             @Override
             public void onCardSwiped(Direction direction) {
+                imageView.setVisibility(View.GONE);
                 Log.d(TAG, "onCardSwiped: p=" + manager.getTopPosition() + " d=" + direction);
+                String id = preferenceManager.getString(Constants.KEY_USER_ID) + UsersID.get(cardsSeen);
                 if (direction == Direction.Right){
                     HashMap<String, Object> user = new HashMap<>();
                     user.put(Constants.KEY_NAME, Names.get(cardsSeen));
                     user.put(Constants.KEY_USER_SEEN, preferenceManager.getString(Constants.KEY_NAME));
-                    db.collection(Constants.KEY_COLLECTION_USERS_SEEN).document(UsersID.get(cardsSeen)).set(user);
+                    db.collection(Constants.KEY_COLLECTION_USERS_SEEN).document(id).set(user);
                     db.collection(Constants.KEY_COLLECTION_USERS_REQUESTED).
                             whereEqualTo(Constants.KEY_NAME, preferenceManager.getString(Constants.KEY_NAME))
                             .whereEqualTo(Constants.KEY_USER_SEEN , Names.get(cardsSeen))
@@ -98,9 +117,9 @@ public class DashboardFragment extends Fragment {
                                     HashMap<String, Object> usersID = new HashMap<>();
                                     usersID.put(Constants.KEY_USER_REQUESTED, UsersID.get(cardsSeen));
                                     usersID.put(Constants.KEY_USER_ACCEPTED, preferenceManager.getString(Constants.KEY_USER_ID));
-                                    db.collection(Constants.KEY_COLLECTION_USERS_ACCEPTED).document(UsersID.get(cardsSeen)).set(usersID);
+                                    db.collection(Constants.KEY_COLLECTION_USERS_ACCEPTED).document(id).set(usersID);
                                 } else if (task.isSuccessful() && task.getResult().getDocuments().size() == 0) {
-                                    db.collection(Constants.KEY_COLLECTION_USERS_REQUESTED).document(UsersID.get(cardsSeen)).set(user);
+                                    db.collection(Constants.KEY_COLLECTION_USERS_REQUESTED).document(id).set(user);
                                 }
                                 cardsSeen++;
                                 if (Images.size() > atUserNumber) {
@@ -116,7 +135,7 @@ public class DashboardFragment extends Fragment {
                     HashMap<String, Object> user = new HashMap<>();
                     user.put(Constants.KEY_NAME, Names.get(cardsSeen));
                     user.put(Constants.KEY_USER_SEEN, preferenceManager.getString(Constants.KEY_NAME));
-                    db.collection(Constants.KEY_COLLECTION_USERS_SEEN).document(UsersID.get(cardsSeen)).set(user);
+                    db.collection(Constants.KEY_COLLECTION_USERS_SEEN).document(id).set(user);
                     db.collection(Constants.KEY_COLLECTION_USERS_REQUESTED).
                             whereEqualTo(Constants.KEY_NAME, preferenceManager.getString(Constants.KEY_NAME))
                             .whereEqualTo(Constants.KEY_USER_SEEN , Names.get(cardsSeen))
@@ -149,6 +168,7 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onCardCanceled() {
                 Log.d(TAG, "onCardRewound: " + manager.getTopPosition());
+                imageView.setVisibility(View.GONE);
             }
 
             @Override
@@ -187,7 +207,6 @@ public class DashboardFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             Integer size = task.getResult().size();
-                            Log.d("imgay", size.toString());
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 // Access the document data
                                 List<Double> values = (List<Double>) document.get(Constants.KEY_AGE_FOR);
@@ -202,12 +221,10 @@ public class DashboardFragment extends Fragment {
                                         .get()
                                         .addOnCompleteListener(task1 -> {
                                             count++;
-                                            Log.d("imgay", count.toString());
                                             if (task1.isSuccessful() && task1.getResult() != null
                                                     && task1.getResult().getDocuments().size() > 0) {
 
                                             } else {
-                                                Log.d("imgay", "here");
                                                 if (age != null && string != null && description != null && name != null) {
                                                     if (isBetween(Integer.parseInt(age), ageMin, ageMax)) {
                                                         if (values != null) {
@@ -229,7 +246,6 @@ public class DashboardFragment extends Fragment {
                                                 }
                                             }
                                             if (count == size) {
-                                                Log.d("imgay", "hi");
                                                 if (Images.size() >= 10) {
                                                     for (int i = 0; i < 10; i++) {
                                                         items.add(new ItemModel(Images.get(i), Names.get(i), Ages.get(i), Descriptions.get(i)));
