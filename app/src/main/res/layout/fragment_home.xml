@@ -5,198 +5,250 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@color/primary"
+    android:background="#ebe2e1"
     tools:context=".ui.home.HomeFragment">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraint"
-        android:layout_width="match_parent"
-        android:visibility="invisible"
-        android:layout_height="match_parent">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            tools:visibility="visible">
 
 
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/imageProfileBackground"
+                android:layout_width="@dimen/_160sdp"
+                android:layout_height="@dimen/_160sdp"
 
+                android:scaleType="centerCrop"
+                android:background="@drawable/circle"
+                app:layout_constraintStart_toStartOf="@id/imageProfile"
+                app:layout_constraintTop_toTopOf="@id/imageProfile"
+                app:layout_constraintEnd_toEndOf="@id/imageProfile"
+                app:layout_constraintBottom_toBottomOf="@id/imageProfile"/>
 
-        <com.makeramen.roundedimageview.RoundedImageView
-        android:id="@+id/imageProfile"
-        android:layout_width="@dimen/_30sdp"
-        android:layout_height="@dimen/_30sdp"
-        android:layout_marginStart="@dimen/_16sdp"
-        android:layout_marginLeft="@dimen/_16sdp"
-        android:layout_marginTop="@dimen/_12sdp"
-        android:background="@drawable/background_icon"
-        android:scaleType="centerCrop"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:riv_corner_radius="@dimen/_8sdp"/>
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/imageProfile"
+                android:layout_width="@dimen/_150sdp"
+                android:layout_height="@dimen/_150sdp"
+                android:layout_marginStart="108dp"
+                android:layout_marginTop="64dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/imageSignOut"
-        android:layout_width="@dimen/_30sdp"
-        android:layout_height="@dimen/_30sdp"
-        android:layout_marginTop="@dimen/_12sdp"
-        android:layout_marginEnd="@dimen/_16sdp"
-        android:layout_marginRight="@dimen/_16sdp"
-        android:background="@drawable/background_icon"
-        android:padding="@dimen/_6sdp"
-        android:src="@drawable/ic_logout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:tint="@color/white" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imageSignOut"
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_30sdp"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:layout_marginEnd="@dimen/_16sdp"
+                android:layout_marginRight="@dimen/_16sdp"
+                android:background="@drawable/background_icon"
+                android:padding="@dimen/_6sdp"
+                android:src="@drawable/ic_logout"
+                android:tint="@color/primary_dark"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/textName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_8sdp"
-        android:layout_marginEnd="@dimen/_8sdp"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="1"
-        android:textColor="@color/white"
-        android:textSize="@dimen/_14ssp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/imageProfile"
-        app:layout_constraintEnd_toStartOf="@id/imageSignOut"
-        app:layout_constraintStart_toEndOf="@id/imageProfile"
-        app:layout_constraintTop_toTopOf="@+id/imageProfile"/>
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imageSettings"
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_30sdp"
+                android:layout_marginTop="@dimen/_12sdp"
+                android:layout_marginEnd="@dimen/_30sdp"
+                android:layout_marginRight="@dimen/_16sdp"
+                android:background="@drawable/background_icon"
+                android:padding="@dimen/_6sdp"
+                android:src="@drawable/ic_baseline_settings_24"
+                android:tint="@color/primary_dark"
+                app:layout_constraintEnd_toEndOf="@id/imageSignOut"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="@dimen/_250sdp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:layout_marginTop="44dp"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textName" />
+            <TextView
+                android:id="@+id/textProfile"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_8sdp"
+                android:layout_marginTop="@dimen/_18sdp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/primary_dark"
+                android:textSize="@dimen/_14ssp"
+                android:textStyle="bold"
+                android:text="Profile"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@id/imageProfile"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-        android:id="@+id/age"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="38dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="Age:"
-        android:textColor="@color/white"
-        android:textSize="@dimen/_14ssp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/recyclerView" />
+            <TextView
+                android:id="@+id/textName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_120sdp"
+                android:layout_marginTop="280dp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/primary_dark"
+                android:textSize="@dimen/_28ssp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@id/textProfile"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/inputAge"
-        android:layout_width="@dimen/_150sdp"
-        android:layout_height="@dimen/_45sdp"
-        android:layout_marginTop="24dp"
-        android:background="@drawable/background_input"
-        android:imeOptions="actionNext"
-        android:importantForAutofill="no"
-        android:inputType="text"
-        app:layout_constraintLeft_toLeftOf="@id/age"
-        android:layout_marginLeft="@dimen/_50sdp"
-        android:paddingStart="@dimen/_16sdp"
-        android:paddingEnd="@dimen/_16sdp"
-        android:textColor="@color/primary_text"
-        android:textSize="@dimen/_13ssp"
-        app:layout_constraintTop_toBottomOf="@id/recyclerView"
-        tools:layout_editor_absoluteX="92dp" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewSelect"
+                android:layout_width="@dimen/_250sdp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="@dimen/_20sdp"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:listitem="@layout/list_strings_home"
+                app:layout_constraintTop_toBottomOf="@id/textName" />
 
-    <TextView
-        android:id="@+id/Description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="68dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="Description:"
-        android:textColor="@color/white"
-        android:textSize="@dimen/_14ssp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/age" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="@dimen/_250sdp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="44dp"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recyclerViewSelect" />
 
-    <EditText
-        android:id="@+id/inputDescription"
-        android:layout_width="@dimen/_150sdp"
-        android:layout_height="@dimen/_45sdp"
-        android:layout_marginLeft="128dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/background_input"
-        android:imeOptions="actionNext"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine"
-        android:maxLines="3"
-        android:paddingStart="@dimen/_16sdp"
-        android:paddingEnd="@dimen/_16sdp"
-        android:scrollbars="vertical"
-        android:textColor="@color/primary_text"
-        android:textSize="@dimen/_13ssp"
-        app:layout_constraintLeft_toLeftOf="@id/Description"
-        app:layout_constraintTop_toBottomOf="@id/inputAge" />
+            <TextView
+                android:id="@+id/age"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="38dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Age:"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_14ssp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recyclerView" />
 
-        <TextView
-            android:id="@+id/ageFor"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="48dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="Looking For:"
-            android:textColor="@color/white"
-            android:textSize="@dimen/_14ssp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/Description" />
+            <EditText
+                android:id="@+id/inputAge"
+                android:layout_width="@dimen/_150sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginLeft="@dimen/_50sdp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/background_input"
+                android:imeOptions="actionNext"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:paddingStart="@dimen/_16sdp"
+                android:paddingEnd="@dimen/_16sdp"
+                android:textColor="@color/primary_text"
+                android:textSize="@dimen/_13ssp"
+                app:layout_constraintLeft_toLeftOf="@id/age"
+                app:layout_constraintTop_toBottomOf="@id/recyclerView"
+                tools:layout_editor_absoluteX="92dp" />
 
-        <com.google.android.material.slider.RangeSlider
-            android:id="@+id/RangeSlider"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="140dp"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/background_icon"
-            android:stepSize="1"
-            android:valueFrom="18"
-            android:valueTo="99"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/inputDescription"
-            app:values="@array/initial_slider_values" />
+            <TextView
+                android:id="@+id/Description"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="68dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Description:"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_14ssp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/age" />
 
-        <TextView
-            android:id="@+id/ageForText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="32dp"
-            android:text="18-99"
-            android:textColor="@color/gray"
-            android:textSize="@dimen/_14ssp"
-            app:layout_constraintStart_toEndOf="@id/RangeSlider"
-            app:layout_constraintTop_toBottomOf="@id/inputDescription" />
+            <EditText
+                android:id="@+id/inputDescription"
+                android:layout_width="@dimen/_150sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginLeft="128dp"
+                android:layout_marginTop="32dp"
+                android:background="@drawable/background_input"
+                android:imeOptions="actionNext"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine"
+                android:maxLines="3"
+                android:paddingStart="@dimen/_16sdp"
+                android:paddingEnd="@dimen/_16sdp"
+                android:scrollbars="vertical"
+                android:textColor="@color/primary_text"
+                android:textSize="@dimen/_13ssp"
+                app:layout_constraintLeft_toLeftOf="@id/Description"
+                app:layout_constraintTop_toBottomOf="@id/inputAge" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/imageSave"
-        android:layout_width="@dimen/_80sdp"
-        android:layout_height="@dimen/_40sdp"
-        android:layout_marginTop="84dp"
-        android:layout_marginEnd="152dp"
-        android:background="@drawable/background_blue"
-        android:padding="@dimen/_6sdp"
-        android:src="@drawable/ic_baseline_save_24"
+            <TextView
+                android:id="@+id/ageFor"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="48dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Looking For:"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_14ssp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/Description" />
 
-        android:tint="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/inputDescription" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.slider.RangeSlider
+                android:id="@+id/RangeSlider"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="140dp"
+                android:layout_marginTop="20dp"
+                android:stepSize="1"
+                android:valueFrom="18"
+                android:valueTo="99"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/inputDescription"
+                app:values="@array/initial_slider_values" />
+
+            <TextView
+                android:id="@+id/ageForText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="32dp"
+                android:text="18-99"
+                android:textColor="@color/gray"
+                android:textSize="@dimen/_14ssp"
+                app:layout_constraintStart_toEndOf="@id/RangeSlider"
+                app:layout_constraintTop_toBottomOf="@id/inputDescription" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imageSave"
+                android:layout_width="@dimen/_80sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="40dp"
+                android:backgroundTint="@color/pale_blue"
+                android:layout_marginEnd="152dp"
+                android:background="@drawable/background_blue"
+                android:padding="@dimen/_6sdp"
+                android:src="@drawable/ic_baseline_save_24"
+
+                android:tint="@color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/RangeSlider" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
     <ProgressBar
         android:id="@+id/progressBar1"

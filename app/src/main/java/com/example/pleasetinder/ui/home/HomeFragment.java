@@ -6,6 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
@@ -22,6 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,6 +41,7 @@ import com.example.pleasetinder.activities.SignInActivity;
 import com.example.pleasetinder.adapters.RecentConversationsAdapter;
 import com.example.pleasetinder.adapters.UsersAdapter;
 import com.example.pleasetinder.adapters.imageAdapter;
+import com.example.pleasetinder.adapters.recyclerViewSelection;
 import com.example.pleasetinder.databinding.FragmentHomeBinding;
 import com.example.pleasetinder.listeners.ConversionListener;
 import com.example.pleasetinder.listeners.OnItemClickListener;
@@ -76,7 +85,9 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
     private FragmentHomeBinding binding;
     private String encodedImage;
     private PreferenceManager preferenceManager;
+    List<String> strings;
     imageAdapter adapter;
+    recyclerViewSelection adapter1;
     List<Integer> imageResIds;
     FirebaseFirestore database;
     HashMap<String, String> hashMap = new HashMap<>();
@@ -96,11 +107,18 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
         preferenceManager = new PreferenceManager(getActivity());
         listString = new ArrayList<>();
         imageResIds =  new ArrayList<>();
+        strings = new ArrayList<>();
+        strings.add("Profile");
+        strings.add("Something");
+        adapter1 = new recyclerViewSelection(strings);
+        RecyclerView.LayoutManager layoutManager1 = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+        binding.recyclerViewSelect.setLayoutManager(layoutManager1);
+        binding.recyclerViewSelect.setItemAnimator(new DefaultItemAnimator());
+        binding.recyclerViewSelect.setAdapter(adapter1);
         for (int i = 0; i < 6; i++) {
             imageResIds.add(R.drawable.ic_add);
         }
         getUsers();
-
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getActivity());
         layoutManager.setFlexDirection(FlexDirection.ROW);
         layoutManager.setJustifyContent(JustifyContent.FLEX_START);
@@ -181,8 +199,13 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
                                     Integer age = (Integer) Integer.parseInt((String) queryDocumentSnapshot.get(Constants.KEY_AGE));
                                     if (age != null) {
                                         binding.inputAge.setText(age.toString());
+                                        binding.textName.setText(preferenceManager.getString(Constants.KEY_NAME) + ", " + age.toString());
                                         preferenceManager.putInteger(Constants.KEY_AGE, age);
+                                    } else {
+                                        binding.textName.setText(preferenceManager.getString(Constants.KEY_NAME));
                                     }
+                                } else {
+                                    binding.textName.setText(preferenceManager.getString(Constants.KEY_NAME));
                                 }
                                 if (queryDocumentSnapshot.get(Constants.KEY_DESCRIPTION) != null) {
                                     String description = (String) queryDocumentSnapshot.get(Constants.KEY_DESCRIPTION);
@@ -200,7 +223,7 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
                                     }
                                 }
                                 if (queryDocumentSnapshot.get(Constants.KEY_AGE) != null && queryDocumentSnapshot.get(Constants.KEY_DESCRIPTION) != null && queryDocumentSnapshot.get(Constants.KEY_AGE_FOR) != null) {
-                                    binding.imageSave.setBackgroundResource(R.drawable.background_icon);
+                                    binding.imageSave.setBackgroundTintList(getActivity().getResources().getColorStateList(R.color.gray));
                                 }
                                 getActivity().findViewById(R.id.nav_view).setVisibility(View.VISIBLE);
                                 binding.progressBar1.setVisibility(View.INVISIBLE);
@@ -258,7 +281,8 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
                                     if (task.isSuccessful()) {
                                         preferenceManager.putInteger(Constants.KEY_AGE_FOR_MIN, values.get(0).intValue());
                                         preferenceManager.putInteger(Constants.KEY_AGE_FOR_MAX, values.get(1).intValue());
-                                        binding.imageSave.setBackgroundResource(R.drawable.background_icon);
+                                        binding.imageSave.setBackgroundTintList(getActivity().getResources().getColorStateList(R.color.gray));
+                                        binding.textName.setText(preferenceManager.getString(Constants.KEY_NAME) + ", " + age.toString());
                                     }
                                 }
                             });
@@ -279,10 +303,36 @@ public class HomeFragment extends BaseFragment implements ConversionListener {
 
 
     private void loadUserDetails() {
-        binding.textName.setText(preferenceManager.getString(Constants.KEY_NAME));
-        byte[] bytes = Base64.decode(preferenceManager.getString(Constants.KEY_IMAGE), Base64.DEFAULT);
+        byte[] bytes = Base64.decode(preferenceManager.getString(Constants.KEY_IMAGE_BIG), Base64.DEFAULT);
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-        binding.imageProfile.setImageBitmap(bitmap);
+        binding.imageProfile.setImageBitmap(getCircularBitmap(bitmap));
+    }
+
+    protected Bitmap getCircularBitmap(Bitmap srcBitmap) {
+        // Calculate the circular bitmap width with border
+        int squareBitmapWidth = Math.min(srcBitmap.getWidth(), srcBitmap.getHeight());
+        // Initialize a new instance of Bitmap
+        Bitmap dstBitmap = Bitmap.createBitmap (
+                squareBitmapWidth, // Width
+                squareBitmapWidth, // Height
+                Bitmap.Config.ARGB_8888 // Config
+        );
+        Canvas canvas = new Canvas(dstBitmap);
+        // Initialize a new Paint instance
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        Rect rect = new Rect(0, 0, squareBitmapWidth, squareBitmapWidth);
+        RectF rectF = new RectF(rect);
+        canvas.drawOval(rectF, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        // Calculate the left and top of copied bitmap
+        float left = (squareBitmapWidth-srcBitmap.getWidth())/2;
+        float top = (squareBitmapWidth-srcBitmap.getHeight())/2;
+        canvas.drawBitmap(srcBitmap, left, top, paint);
+        // Free the native object associated with this bitmap.
+        srcBitmap.recycle();
+        // Return the circular bitmap
+        return dstBitmap;
     }
 
     private void showToast(String message) {
